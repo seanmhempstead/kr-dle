@@ -1,0 +1,5 @@
+{
+  "name": "KR-dle",
+  "description": "A Korean word guessing game that teaches both Jamo (letters) and Eumjol (syllables) structure.",
+  "requestFramePermissions": []
+}
