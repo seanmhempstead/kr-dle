@@ -8,7 +8,7 @@ import { WORD_LIST } from './wordList';
 function App() {
   const [targetWord, setTargetWord] = useState<string>("");
   const [targetMeaning, setTargetMeaning] = useState<string>("");
-  
+
   // Game State
   const [guesses, setGuesses] = useState<RowData[]>([]);
   const [currentJamoInput, setCurrentJamoInput] = useState<string[]>([]);
@@ -22,7 +22,7 @@ function App() {
     const selection = WORD_LIST[randomIndex];
     setTargetWord(selection.word);
     setTargetMeaning(selection.meaning);
-    
+
     setGuesses([]);
     setCurrentJamoInput([]);
     setGameStatus('playing');
@@ -40,122 +40,188 @@ function App() {
     const syllableBlocks: SyllableBlock[] = [];
     const newKeyState = { ...keyState };
 
-    // 1. Evaluate Whole Syllables first (Green/Orange/Grey)
-    const targetSyllablesFreq: Record<string, number> = {};
-    targetSyllables.forEach(s => targetSyllablesFreq[s] = (targetSyllablesFreq[s] || 0) + 1);
+    // --- PRE-CALCULATE FREQUENCIES ---
 
-    const evaluatedSyllables: { char: string; status: CharStatus }[] = inputSyllables.map((char, idx) => {
-        let status: CharStatus = CharStatus.Absent;
-        if (char === targetSyllables[idx]) {
-            status = CharStatus.Correct;
-            targetSyllablesFreq[char]--;
-        }
-        return { char, status };
-    });
-
-    // Second pass for Syllable Orange (Present)
-    evaluatedSyllables.forEach((item, idx) => {
-        if (item.status !== CharStatus.Correct && targetSyllablesFreq[item.char] > 0) {
-            item.status = CharStatus.Present;
-            targetSyllablesFreq[item.char]--;
-        }
-    });
-
-    // 2. Evaluate Jamo Parts (The detailed breakdown)
-    // We create a pool of ATOMIC target Jamos (e.g., ㅢ becomes ㅡ, ㅣ) to allow partial matching hints
-    const atomicTargetJamos: string[] = [];
+    // 1. Global Word Frequency (Atomic)
+    const globalTargetFreq: Record<string, number> = {};
     targetSyllables.forEach(s => {
-        decomposeHangul(s).forEach(p => {
-            if (p) atomicTargetJamos.push(...disassembleComplexJamo(p));
+      decomposeHangul(s).forEach(p => {
+        if (p) disassembleComplexJamo(p).forEach(atom => {
+          globalTargetFreq[atom] = (globalTargetFreq[atom] || 0) + 1;
         });
+      });
     });
 
-    const atomicTargetFreq: Record<string, number> = {};
-    atomicTargetJamos.forEach(c => atomicTargetFreq[c] = (atomicTargetFreq[c] || 0) + 1);
-
-    inputSyllables.forEach((sChar, sIdx) => {
-        const sParts = decomposeHangul(sChar); // ['ㅎ', 'ㅏ', 'ㄴ']
-        const tParts = decomposeHangul(targetSyllables[sIdx]); // Target parts at same index
-
-        const evaluatedParts: JamoPart[] = sParts.map((pChar, pIdx) => {
-             // Skip empty Jongseong
-             if (pChar === '') return { char: '', status: CharStatus.None };
-
-             let status: CharStatus = CharStatus.Absent;
-             let subStatus: CharStatus[] | undefined;
-
-             const atoms = disassembleComplexJamo(pChar);
-
-             // Green Check (Exact match in this slot)
-             if (tParts[pIdx] === pChar) {
-                 status = CharStatus.Correct;
-                 // Decrement frequency for atomic components of this correct match
-                 atoms.forEach(atom => {
-                    if (atomicTargetFreq[atom] > 0) atomicTargetFreq[atom]--;
-                 });
-             } else {
-                 // Yellow Check: Is this Jamo (or its parts) in the target?
-                 // If it's a complex char, we check each atom individually
-                 if (atoms.length > 1) {
-                     subStatus = atoms.map(atom => {
-                         return atomicTargetFreq[atom] > 0 ? CharStatus.Present : CharStatus.Absent;
-                     });
-                     
-                     // If any part is present, the whole block is technically "Present"
-                     if (subStatus.some(s => s === CharStatus.Present)) {
-                         status = CharStatus.Present;
-                     }
-                 } else {
-                     // Simple char logic
-                     if (atomicTargetFreq[pChar] > 0) {
-                         status = CharStatus.Present;
-                     }
-                 }
-             }
-             
-             // Update Keyboard State (Global best status)
-             atoms.forEach((atom, i) => {
-                 let atomStatus: CharStatus = status;
-                 // Use granular status if available and not a perfect match
-                 if (status !== CharStatus.Correct && subStatus && subStatus[i]) {
-                     atomStatus = subStatus[i];
-                 }
-
-                 const currentKeyStatus = newKeyState[atom] || CharStatus.None;
-                 if (atomStatus === CharStatus.Correct) {
-                     newKeyState[atom] = CharStatus.Correct;
-                 } else if (atomStatus === CharStatus.Present && currentKeyStatus !== CharStatus.Correct) {
-                     newKeyState[atom] = CharStatus.Present;
-                 } else if (atomStatus === CharStatus.Absent && currentKeyStatus === CharStatus.None) {
-                     newKeyState[atom] = CharStatus.Absent;
-                 }
-             });
-
-             return { char: pChar, status, subStatus };
+    // 2. Per-Syllable Frequency (Atomic)
+    const syllableTargetFreqs: Record<string, number>[] = targetSyllables.map(s => {
+      const freq: Record<string, number> = {};
+      decomposeHangul(s).forEach(p => {
+        if (p) disassembleComplexJamo(p).forEach(atom => {
+          freq[atom] = (freq[atom] || 0) + 1;
         });
-
-        syllableBlocks.push({
-            char: sChar,
-            status: evaluatedSyllables[sIdx].status,
-            parts: evaluatedParts
-        });
+      });
+      return freq;
     });
-    
+
+    // Prepare data structure for input atoms to track their status
+    const evaluatedSyllables = inputSyllables.map((sChar, sIdx) => {
+      const sParts = decomposeHangul(sChar);
+      const tParts = decomposeHangul(targetSyllables[sIdx]);
+
+      return sParts.map((pChar, pIdx) => {
+        if (pChar === '') return { char: '', atoms: [], atomStatuses: [], tChar: '' };
+
+        const atoms = disassembleComplexJamo(pChar);
+        // Initial status for atoms
+        const atomStatuses = atoms.map(() => CharStatus.Absent);
+
+        return {
+          char: pChar,
+          atoms,
+          atomStatuses,
+          tChar: tParts[pIdx] // Corresponding target part for alignment check
+        };
+      });
+    });
+
+    // --- PASS 1: CORRECT (Green) ---
+    evaluatedSyllables.forEach((parts, sIdx) => {
+      parts.forEach((part, pIdx) => {
+        if (!part.char) return;
+
+        // Check alignment with target part (Exact Match of the component)
+        if (part.char === part.tChar) {
+          part.atomStatuses.fill(CharStatus.Correct);
+          // Decrement counts
+          part.atoms.forEach(atom => {
+            if (syllableTargetFreqs[sIdx][atom] > 0) syllableTargetFreqs[sIdx][atom]--;
+            if (globalTargetFreq[atom] > 0) globalTargetFreq[atom]--;
+          });
+        }
+      });
+    });
+
+    // --- PASS 2: PRESENT (Yellow - In Current Syllable) ---
+    evaluatedSyllables.forEach((parts, sIdx) => {
+      parts.forEach(part => {
+        if (!part.char) return;
+
+        part.atoms.forEach((atom, aIdx) => {
+          if (part.atomStatuses[aIdx] === CharStatus.Correct) return;
+
+          // Check if in current syllable
+          if (syllableTargetFreqs[sIdx][atom] > 0) {
+            part.atomStatuses[aIdx] = CharStatus.Present;
+            syllableTargetFreqs[sIdx][atom]--;
+            if (globalTargetFreq[atom] > 0) globalTargetFreq[atom]--;
+          }
+        });
+      });
+    });
+
+    // --- PASS 3: MISPLACED SYLLABLE (Blue - In Word) ---
+    evaluatedSyllables.forEach((parts, sIdx) => {
+      parts.forEach(part => {
+        if (!part.char) return;
+
+        part.atoms.forEach((atom, aIdx) => {
+          if (part.atomStatuses[aIdx] === CharStatus.Correct || part.atomStatuses[aIdx] === CharStatus.Present) return;
+
+          // Check if in global word
+          if (globalTargetFreq[atom] > 0) {
+            part.atomStatuses[aIdx] = CharStatus.MisplacedSyllable;
+            globalTargetFreq[atom]--;
+          }
+        });
+      });
+    });
+
+    // --- CONSTRUCT RESULT & UPDATE KEYBOARD ---
+    evaluatedSyllables.forEach((parts, sIdx) => {
+      const finalParts: JamoPart[] = parts.map(part => {
+        if (!part.char) return { char: '', status: CharStatus.None };
+
+        // Determine aggregate status for the JamoPart
+        let status = CharStatus.Absent;
+
+        // If all atoms are correct -> Correct
+        if (part.atomStatuses.every(s => s === CharStatus.Correct)) {
+          status = CharStatus.Correct;
+        }
+        // If any atom is Present -> Present (takes precedence over Misplaced)
+        else if (part.atomStatuses.some(s => s === CharStatus.Present)) {
+          status = CharStatus.Present;
+        }
+        // If any atom is Misplaced -> Misplaced
+        else if (part.atomStatuses.some(s => s === CharStatus.MisplacedSyllable)) {
+          status = CharStatus.MisplacedSyllable;
+        }
+
+        // Substatus for complex chars
+        const subStatus = part.atoms.length > 1 ? part.atomStatuses : undefined;
+
+        // Update Keyboard
+        part.atoms.forEach((atom, i) => {
+          const atomStatus = part.atomStatuses[i];
+          const currentKeyStatus = newKeyState[atom] || CharStatus.None;
+
+          // Priority: Correct > Present > MisplacedSyllable > Absent
+          const priority = {
+            [CharStatus.Correct]: 4,
+            [CharStatus.Present]: 3,
+            [CharStatus.MisplacedSyllable]: 2,
+            [CharStatus.Absent]: 1,
+            [CharStatus.None]: 0
+          };
+
+          if (priority[atomStatus] > priority[currentKeyStatus]) {
+            newKeyState[atom] = atomStatus;
+          }
+        });
+
+        return {
+          char: part.char,
+          status,
+          subStatus
+        };
+      });
+
+      // Determine Syllable Status (for the big block border)
+      let syllableStatus = CharStatus.Absent;
+      const allPartStatuses = finalParts.flatMap(p => p.subStatus || p.status);
+
+      if (allPartStatuses.length > 0) {
+        if (allPartStatuses.every(s => s === CharStatus.Correct)) {
+          syllableStatus = CharStatus.Correct;
+        } else if (allPartStatuses.some(s => s === CharStatus.Present)) {
+          syllableStatus = CharStatus.Present;
+        } else if (allPartStatuses.some(s => s === CharStatus.MisplacedSyllable)) {
+          syllableStatus = CharStatus.MisplacedSyllable;
+        }
+      }
+
+      syllableBlocks.push({
+        char: inputSyllables[sIdx],
+        status: syllableStatus,
+        parts: finalParts
+      });
+    });
+
     setKeyState(newKeyState);
     return { syllables: syllableBlocks, isValid: true };
   };
 
   const handleInput = useCallback((char: string) => {
     if (gameStatus !== 'playing') return;
-    
+
     // Check if input would create > 2 blocks
     const potentialInput = [...currentJamoInput, char];
     const assembled = assembleJamo(potentialInput);
-    
+
     if (assembled.length > 2) {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        return;
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
     }
 
     setCurrentJamoInput(potentialInput);
@@ -170,18 +236,18 @@ function App() {
     if (gameStatus !== 'playing') return;
 
     const assembled = assembleJamo(currentJamoInput);
-    
+
     // Validation: Must be exactly 2 syllables
     if (assembled.length !== 2) {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        return;
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
     }
     // Validate if they are complete Hangul chars (not loose jamo)
     if (!assembled.every(c => c.charCodeAt(0) >= 44032 && c.charCodeAt(0) <= 55203)) {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        return;
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
     }
 
     const newRowData = evaluateGuess(assembled);
@@ -192,9 +258,9 @@ function App() {
     // Check Win/Loss
     const guessWord = assembled.join('');
     if (guessWord === targetWord) {
-        setGameStatus('won');
+      setGameStatus('won');
     } else if (newGuesses.length >= 5) {
-        setGameStatus('lost');
+      setGameStatus('lost');
     }
 
   }, [currentJamoInput, gameStatus, guesses, targetWord, keyState]);
@@ -217,7 +283,7 @@ function App() {
       {/* Header */}
       <header className="flex items-center justify-between p-4 border-b border-slate-800">
         <h1 className="text-xl sm:text-2xl font-bold text-blue-400 tracking-wider">KR-dle</h1>
-        <button 
+        <button
           onClick={startNewGame}
           className="px-3 py-1.5 text-xs font-bold text-white bg-slate-700 hover:bg-slate-600 rounded border border-slate-600 transition-colors"
           title="Get a new word"
@@ -227,43 +293,43 @@ function App() {
       </header>
 
       {/* Grid Area */}
-      <Grid 
-        guesses={guesses} 
-        currentGuess={currentJamoInput} 
+      <Grid
+        guesses={guesses}
+        currentGuess={currentJamoInput}
         currentRowIndex={guesses.length}
         assembledCurrentGuess={assembledDisplay}
       />
 
       {/* Input Area */}
       <div className="p-2">
-         <Keyboard 
-            onChar={handleInput} 
-            onDelete={handleDelete} 
-            onEnter={handleEnter} 
-            keyState={keyState}
-         />
+        <Keyboard
+          onChar={handleInput}
+          onDelete={handleDelete}
+          onEnter={handleEnter}
+          keyState={keyState}
+        />
       </div>
 
       {/* Game Over Modal */}
       {gameStatus !== 'playing' && (
         <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div className="bg-slate-800 border border-slate-700 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
-                <h2 className={`text-3xl font-bold mb-4 ${gameStatus === 'won' ? 'text-green-500' : 'text-red-500'}`}>
-                    {gameStatus === 'won' ? 'Correct!' : 'Game Over'}
-                </h2>
-                <div className="mb-6">
-                    <p className="text-slate-400 mb-2">The word was:</p>
-                    <div className="text-5xl font-bold text-white mb-2">{targetWord}</div>
-                    <p className="text-blue-300 text-lg">{targetMeaning}</p>
-                </div>
-                
-                <button 
-                    onClick={startNewGame}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors w-full"
-                >
-                    Play Again
-                </button>
+          <div className="bg-slate-800 border border-slate-700 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
+            <h2 className={`text-3xl font-bold mb-4 ${gameStatus === 'won' ? 'text-green-500' : 'text-red-500'}`}>
+              {gameStatus === 'won' ? 'Correct!' : 'Game Over'}
+            </h2>
+            <div className="mb-6">
+              <p className="text-slate-400 mb-2">The word was:</p>
+              <div className="text-5xl font-bold text-white mb-2">{targetWord}</div>
+              <p className="text-blue-300 text-lg">{targetMeaning}</p>
             </div>
+
+            <button
+              onClick={startNewGame}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors w-full"
+            >
+              Play Again
+            </button>
+          </div>
         </div>
       )}
     </div>

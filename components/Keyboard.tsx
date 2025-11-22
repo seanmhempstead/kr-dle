@@ -15,12 +15,14 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
   const getKeyStyle = (char: string) => {
     const status = keyState[char] || CharStatus.None;
     const base = "font-bold uppercase text-sm sm:text-base rounded shadow-md transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-12 sm:h-14 ";
-    
+
     switch (status) {
       case CharStatus.Correct:
         return base + "bg-green-600 text-white border-green-700";
       case CharStatus.Present:
         return base + "bg-yellow-500 text-white border-yellow-600";
+      case CharStatus.MisplacedSyllable:
+        return base + "bg-blue-500 text-white border-blue-600";
       case CharStatus.Absent:
         return base + "bg-slate-700 text-slate-400 border-slate-800";
       default:
@@ -51,16 +53,16 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
             )}
 
             {row.map((char) => {
-                const displayChar = isShift && SHIFT_MAP[char] ? SHIFT_MAP[char] : char;
-                return (
-                    <button
-                        key={char}
-                        onClick={() => handleCharClick(char)}
-                        className={`${getKeyStyle(displayChar)} flex-1 max-w-[40px] sm:max-w-[50px]`}
-                    >
-                    {displayChar}
-                    </button>
-                )
+              const displayChar = isShift && SHIFT_MAP[char] ? SHIFT_MAP[char] : char;
+              return (
+                <button
+                  key={char}
+                  onClick={() => handleCharClick(char)}
+                  className={`${getKeyStyle(displayChar)} flex-1 max-w-[40px] sm:max-w-[50px]`}
+                >
+                  {displayChar}
+                </button>
+              )
             })}
 
             {/* Backspace on last row */}
@@ -75,12 +77,12 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
           </div>
         ))}
         <div className="flex justify-center mt-2">
-             <button
-                onClick={onEnter}
-                className="w-full max-w-[200px] h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded shadow-lg active:scale-95 transition-transform"
-              >
-                INPUT (입력)
-              </button>
+          <button
+            onClick={onEnter}
+            className="w-full max-w-[200px] h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded shadow-lg active:scale-95 transition-transform"
+          >
+            INPUT (입력)
+          </button>
         </div>
       </div>
     </div>

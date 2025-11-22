@@ -1,6 +1,7 @@
 export enum CharStatus {
   Correct = 'correct', // Green
-  Present = 'present', // Orange/Yellow
+  Present = 'present', // Orange/Yellow (In current syllable)
+  MisplacedSyllable = 'misplaced_syllable', // Blue (In word, different syllable)
   Absent = 'absent',   // Grey
   None = 'none',       // Default
 }
