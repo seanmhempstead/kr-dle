@@ -1,6 +1,7 @@
 import React from 'react';
 import { KEYBOARD_ROWS, SHIFT_MAP } from '../constants';
 import { KeyState, CharStatus } from '../types';
+import { STATUS_STYLES } from '../constants/colours';
 
 interface KeyboardProps {
   onChar: (char: string) => void;
@@ -16,18 +17,13 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
     const status = keyState[char] || CharStatus.None;
     const base = "font-bold uppercase text-sm sm:text-base rounded shadow-md transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-12 sm:h-14 ";
 
-    switch (status) {
-      case CharStatus.Correct:
-        return base + "bg-green-600 text-white border-green-700";
-      case CharStatus.Present:
-        return base + "bg-yellow-500 text-white border-yellow-600";
-      case CharStatus.MisplacedSyllable:
-        return base + "bg-blue-500 text-white border-blue-600";
-      case CharStatus.Absent:
-        return base + "bg-slate-700 text-slate-400 border-slate-800";
-      default:
-        return base + "bg-slate-200 text-slate-900 hover:bg-slate-300";
+    const style = STATUS_STYLES[status];
+
+    if (status === CharStatus.None) {
+      return base + `${style.keyBg} ${style.keyText} ${style.keyHover}`;
     }
+
+    return base + `${style.bg} ${style.text} ${style.keyBorder || ''}`;
   };
 
   const handleCharClick = (char: string) => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { RowData, CharStatus, SyllableBlock, JamoPart } from '../types';
 import { decomposeHangul, getVowelType, disassembleComplexJamo } from '../utils/hangul';
+import { STATUS_STYLES } from '../constants/colours';
 
 interface GridProps {
     guesses: RowData[];
@@ -14,11 +15,11 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
     let borderColor = "border-slate-700";
 
     if (syllable) {
-        if (syllable.status === CharStatus.Correct) borderColor = "border-green-600";
-        else if (syllable.status === CharStatus.Present) borderColor = "border-yellow-600";
-        else if (syllable.status === CharStatus.MisplacedSyllable) borderColor = "border-blue-600";
-        else if (syllable.status === CharStatus.Absent) borderColor = "border-slate-700";
-        else if (isCurrent) borderColor = "border-slate-500";
+        if (syllable.status !== CharStatus.None) {
+            borderColor = STATUS_STYLES[syllable.status].border;
+        } else if (isCurrent) {
+            borderColor = "border-slate-500";
+        }
     }
 
     // Render Empty State
@@ -45,13 +46,9 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
     const vowelType = getVowelType(jung.char);
 
     const getBgColor = (status: CharStatus) => {
-        switch (status) {
-            case CharStatus.Correct: return "bg-green-600 text-white";
-            case CharStatus.Present: return "bg-yellow-500 text-white";
-            case CharStatus.MisplacedSyllable: return "bg-blue-500 text-white";
-            case CharStatus.Absent: return "bg-slate-700 text-slate-400";
-            default: return "bg-slate-800";
-        }
+        const style = STATUS_STYLES[status];
+        if (status === CharStatus.None) return "bg-slate-800";
+        return `${style.bg} ${style.text}`;
     };
 
     const JamoBox = ({ part, className }: { part: JamoPart, className: string }) => (
