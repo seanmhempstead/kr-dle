@@ -1,6 +1,6 @@
 import React from 'react';
 import { RowData, CharStatus, SyllableBlock, JamoPart } from '../types';
-import { decomposeHangul, getVowelType, disassembleComplexJamo } from '../utils/hangul';
+import { decomposeHangul, getVowelType } from '../utils/hangul';
 import { STATUS_STYLES } from '../constants/colours';
 
 interface GridProps {
@@ -57,41 +57,8 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
         </div>
     );
 
-    // Handle Mixed Vowels (e.g. ㅘ -> ㅗ + ㅏ)
-    if (vowelType === 'mixed') {
-        const complexParts = disassembleComplexJamo(jung.char);
-
-        // Use granular subStatus if available, otherwise fall back to main status
-        const s0 = (jung.subStatus && jung.subStatus[0]) ? jung.subStatus[0] : jung.status;
-        const s1 = (jung.subStatus && jung.subStatus[1]) ? jung.subStatus[1] : jung.status;
-
-        const vHoriz: JamoPart = { char: complexParts[0], status: s0 };
-        const vVert: JamoPart = { char: complexParts[1], status: s1 };
-
-        return (
-            <div className={`w-20 h-20 sm:w-24 sm:h-24 flex flex-col rounded-lg overflow-hidden border-4 ${borderColor} box-border`}>
-                {/* Top Section: Cho + Vowels */}
-                <div className={`flex w-full gap-[1px] ${hasJong ? 'h-[66%]' : 'h-full'}`}>
-                    {/* Left Column: Cho + Horizontal Vowel */}
-                    <div className="flex flex-col flex-1 gap-[1px]">
-                        <JamoBox part={cho} className="flex-1" />
-                        <JamoBox part={vHoriz} className="flex-1" />
-                    </div>
-                    {/* Right Column: Vertical Vowel */}
-                    <div className="flex-1">
-                        <JamoBox part={vVert} className="w-full h-full" />
-                    </div>
-                </div>
-                {/* Bottom Section: Jong */}
-                {hasJong && (
-                    <div className="h-[34%] w-full bg-slate-900 border-t border-slate-900">
-                        <JamoBox part={jong} className="w-full h-full" />
-                    </div>
-                )}
-            </div>
-        )
-    }
-
+    // Handle Mixed Vowels or Normal Vowels together (Simpler View)
+    // We no longer split complex vowels.
     return (
         <div className={`w-20 h-20 sm:w-24 sm:h-24 flex flex-col rounded-lg overflow-hidden border-4 ${borderColor} box-border`}>
             {/* Horizontal Vowel Layout (Stack) */}
@@ -102,7 +69,7 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
                     {hasJong && <JamoBox part={jong} className="flex-1" />}
                 </div>
             ) : (
-                // Vertical Vowel Layout
+                // Vertical or Mixed Vowel Layout
                 <div className="flex flex-col h-full w-full gap-[1px] bg-slate-900">
                     {/* Top Half: Cho + Jung */}
                     <div className={`flex w-full gap-[1px] ${hasJong ? 'h-[66%]' : 'h-full'}`}>

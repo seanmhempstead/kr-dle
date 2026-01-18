@@ -3,7 +3,7 @@ import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
 import HelpModal from './components/HelpModal';
 import { RowData, CharStatus, KeyState, SyllableBlock, JamoPart } from './types';
-import { assembleJamo, decomposeHangul, disassembleComplexJamo } from './utils/hangul';
+import { assembleJamo, decomposeHangul } from './utils/hangul';
 import { WORD_LIST } from './wordList';
 
 function App() {
@@ -48,9 +48,9 @@ function App() {
     const globalTargetFreq: Record<string, number> = {};
     targetSyllables.forEach(s => {
       decomposeHangul(s).forEach(p => {
-        if (p) disassembleComplexJamo(p).forEach(atom => {
-          globalTargetFreq[atom] = (globalTargetFreq[atom] || 0) + 1;
-        });
+        if (p) {
+          globalTargetFreq[p] = (globalTargetFreq[p] || 0) + 1;
+        }
       });
     });
 
@@ -58,9 +58,9 @@ function App() {
     const syllableTargetFreqs: Record<string, number>[] = targetSyllables.map(s => {
       const freq: Record<string, number> = {};
       decomposeHangul(s).forEach(p => {
-        if (p) disassembleComplexJamo(p).forEach(atom => {
-          freq[atom] = (freq[atom] || 0) + 1;
-        });
+        if (p) {
+          freq[p] = (freq[p] || 0) + 1;
+        }
       });
       return freq;
     });
@@ -71,16 +71,11 @@ function App() {
       const tParts = decomposeHangul(targetSyllables[sIdx]);
 
       return sParts.map((pChar, pIdx) => {
-        if (pChar === '') return { char: '', atoms: [], atomStatuses: [], tChar: '' };
-
-        const atoms = disassembleComplexJamo(pChar);
-        // Initial status for atoms
-        const atomStatuses = atoms.map(() => CharStatus.Absent);
+        if (pChar === '') return { char: '', status: CharStatus.Absent, tChar: '' };
 
         return {
           char: pChar,
-          atoms,
-          atomStatuses,
+          status: CharStatus.Absent, // Initial status
           tChar: tParts[pIdx] // Corresponding target part for alignment check
         };
       });
@@ -88,17 +83,15 @@ function App() {
 
     // --- PASS 1: CORRECT (Green) ---
     evaluatedSyllables.forEach((parts, sIdx) => {
-      parts.forEach((part, pIdx) => {
+      parts.forEach((part) => {
         if (!part.char) return;
 
         // Check alignment with target part (Exact Match of the component)
         if (part.char === part.tChar) {
-          part.atomStatuses.fill(CharStatus.Correct);
+          part.status = CharStatus.Correct;
           // Decrement counts
-          part.atoms.forEach(atom => {
-            if (syllableTargetFreqs[sIdx][atom] > 0) syllableTargetFreqs[sIdx][atom]--;
-            if (globalTargetFreq[atom] > 0) globalTargetFreq[atom]--;
-          });
+          if (syllableTargetFreqs[sIdx][part.char] > 0) syllableTargetFreqs[sIdx][part.char]--;
+          if (globalTargetFreq[part.char] > 0) globalTargetFreq[part.char]--;
         }
       });
     });
@@ -107,17 +100,14 @@ function App() {
     evaluatedSyllables.forEach((parts, sIdx) => {
       parts.forEach(part => {
         if (!part.char) return;
+        if (part.status === CharStatus.Correct) return;
 
-        part.atoms.forEach((atom, aIdx) => {
-          if (part.atomStatuses[aIdx] === CharStatus.Correct) return;
-
-          // Check if in current syllable
-          if (syllableTargetFreqs[sIdx][atom] > 0) {
-            part.atomStatuses[aIdx] = CharStatus.Present;
-            syllableTargetFreqs[sIdx][atom]--;
-            if (globalTargetFreq[atom] > 0) globalTargetFreq[atom]--;
-          }
-        });
+        // Check if in current syllable
+        if (syllableTargetFreqs[sIdx][part.char] > 0) {
+          part.status = CharStatus.Present;
+          syllableTargetFreqs[sIdx][part.char]--;
+          if (globalTargetFreq[part.char] > 0) globalTargetFreq[part.char]--;
+        }
       });
     });
 
@@ -125,16 +115,13 @@ function App() {
     evaluatedSyllables.forEach((parts, sIdx) => {
       parts.forEach(part => {
         if (!part.char) return;
+        if (part.status === CharStatus.Correct || part.status === CharStatus.Present) return;
 
-        part.atoms.forEach((atom, aIdx) => {
-          if (part.atomStatuses[aIdx] === CharStatus.Correct || part.atomStatuses[aIdx] === CharStatus.Present) return;
-
-          // Check if in global word
-          if (globalTargetFreq[atom] > 0) {
-            part.atomStatuses[aIdx] = CharStatus.MisplacedSyllable;
-            globalTargetFreq[atom]--;
-          }
-        });
+        // Check if in global word
+        if (globalTargetFreq[part.char] > 0) {
+          part.status = CharStatus.MisplacedSyllable;
+          globalTargetFreq[part.char]--;
+        }
       });
     });
 
@@ -143,54 +130,31 @@ function App() {
       const finalParts: JamoPart[] = parts.map(part => {
         if (!part.char) return { char: '', status: CharStatus.None };
 
-        // Determine aggregate status for the JamoPart
-        let status = CharStatus.Absent;
+        const atomStatus = part.status;
+        const currentKeyStatus = newKeyState[part.char] || CharStatus.None;
 
-        // If all atoms are correct -> Correct
-        if (part.atomStatuses.every(s => s === CharStatus.Correct)) {
-          status = CharStatus.Correct;
+        // Priority: Correct > Present > MisplacedSyllable > Absent
+        const priority = {
+          [CharStatus.Correct]: 4,
+          [CharStatus.Present]: 3,
+          [CharStatus.MisplacedSyllable]: 2,
+          [CharStatus.Absent]: 1,
+          [CharStatus.None]: 0
+        };
+
+        if (priority[atomStatus] > priority[currentKeyStatus]) {
+          newKeyState[part.char] = atomStatus;
         }
-        // If any atom is Present -> Present (takes precedence over Misplaced)
-        else if (part.atomStatuses.some(s => s === CharStatus.Present)) {
-          status = CharStatus.Present;
-        }
-        // If any atom is Misplaced -> Misplaced
-        else if (part.atomStatuses.some(s => s === CharStatus.MisplacedSyllable)) {
-          status = CharStatus.MisplacedSyllable;
-        }
-
-        // Substatus for complex chars
-        const subStatus = part.atoms.length > 1 ? part.atomStatuses : undefined;
-
-        // Update Keyboard
-        part.atoms.forEach((atom, i) => {
-          const atomStatus = part.atomStatuses[i];
-          const currentKeyStatus = newKeyState[atom] || CharStatus.None;
-
-          // Priority: Correct > Present > MisplacedSyllable > Absent
-          const priority = {
-            [CharStatus.Correct]: 4,
-            [CharStatus.Present]: 3,
-            [CharStatus.MisplacedSyllable]: 2,
-            [CharStatus.Absent]: 1,
-            [CharStatus.None]: 0
-          };
-
-          if (priority[atomStatus] > priority[currentKeyStatus]) {
-            newKeyState[atom] = atomStatus;
-          }
-        });
 
         return {
           char: part.char,
-          status,
-          subStatus
+          status: part.status
         };
       });
 
       // Determine Syllable Status (for the big block border)
       let syllableStatus = CharStatus.Absent;
-      const allPartStatuses = finalParts.flatMap(p => p.subStatus || p.status);
+      const allPartStatuses = finalParts.map(p => p.status);
 
       if (allPartStatuses.length > 0) {
         if (allPartStatuses.every(s => s === CharStatus.Correct)) {
