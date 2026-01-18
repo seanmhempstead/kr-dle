@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
 import HelpModal from './components/HelpModal';
+import ConfirmationModal from './components/ConfirmationModal';
 import { RowData, CharStatus, KeyState, SyllableBlock, JamoPart } from './types';
 import { assembleJamo, decomposeHangul, disassembleForKeyboard } from './utils/hangul';
 import { WORD_LIST } from './wordList';
@@ -17,6 +18,7 @@ function App() {
   const [keyState, setKeyState] = useState<KeyState>({});
   const [shake, setShake] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isRestartConfirmOpen, setIsRestartConfirmOpen] = useState(false);
 
   // Initialize / Reset Game
   const startNewGame = useCallback(() => {
@@ -35,6 +37,14 @@ function App() {
   useEffect(() => {
     startNewGame();
   }, [startNewGame]);
+
+  const handleNewWordClick = () => {
+    if (gameStatus === 'playing' && guesses.length > 0) {
+      setIsRestartConfirmOpen(true);
+    } else {
+      startNewGame();
+    }
+  };
 
   // Helper: Evaluate a guess against the target
   const evaluateGuess = (inputSyllables: string[]): RowData => {
@@ -256,7 +266,7 @@ function App() {
         <h1 className="text-xl sm:text-2xl font-bold text-blue-400 tracking-wider">KR-dle</h1>
         <div className="flex items-center gap-2">
           <button
-            onClick={startNewGame}
+            onClick={handleNewWordClick}
             className="p-2 text-white bg-slate-700 hover:bg-slate-600 rounded-full border border-slate-600 transition-colors"
             title="Get a new word"
             aria-label="New Word"
@@ -349,6 +359,16 @@ function App() {
       <HelpModal
         isOpen={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isRestartConfirmOpen}
+        onClose={() => setIsRestartConfirmOpen(false)}
+        onConfirm={startNewGame}
+        title="Start New Game?"
+        message="Are you sure you want to give up on this word? Your progress will be lost."
+        confirmText="New Word"
       />
 
       {/* Game Over Modal */}
