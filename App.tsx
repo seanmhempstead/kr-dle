@@ -6,6 +6,7 @@ import ConfirmationModal from './components/ConfirmationModal';
 import { RowData, CharStatus, KeyState, SyllableBlock, JamoPart } from './types';
 import { assembleJamo, decomposeHangul, disassembleForKeyboard } from './utils/hangul';
 import { WORD_LIST } from './wordList';
+import { QWERTY_MAP } from './constants';
 
 function App() {
   const [targetWord, setTargetWord] = useState<string>("");
@@ -251,6 +252,11 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Backspace') handleDelete();
       if (e.key === 'Enter') handleEnter();
+
+      const mappedChar = QWERTY_MAP[e.key];
+      if (mappedChar) {
+        handleInput(mappedChar);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
