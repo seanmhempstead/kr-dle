@@ -3,7 +3,7 @@ import Grid from './components/Grid';
 import Keyboard from './components/Keyboard';
 import HelpModal from './components/HelpModal';
 import { RowData, CharStatus, KeyState, SyllableBlock, JamoPart } from './types';
-import { assembleJamo, decomposeHangul } from './utils/hangul';
+import { assembleJamo, decomposeHangul, disassembleForKeyboard } from './utils/hangul';
 import { WORD_LIST } from './wordList';
 
 function App() {
@@ -130,22 +130,27 @@ function App() {
       const finalParts: JamoPart[] = parts.map(part => {
         if (!part.char) return { char: '', status: CharStatus.None };
 
+        // Update Keyboard
+        // For complex characters (e.g. ㅘ), we need to update status for component keys (ㅗ, ㅏ)
+        const atomsForKeyboard = disassembleForKeyboard(part.char);
         const atomStatus = part.status;
-        const currentKeyStatus = newKeyState[part.char] || CharStatus.None;
 
-        // Priority: Correct > Present > MisplacedSyllable > Absent
-        const priority = {
-          [CharStatus.Correct]: 4,
-          [CharStatus.Present]: 3,
-          [CharStatus.MisplacedSyllable]: 2,
-          [CharStatus.Absent]: 1,
-          [CharStatus.None]: 0
-        };
+        atomsForKeyboard.forEach(atom => {
+          const currentKeyStatus = newKeyState[atom] || CharStatus.None;
 
-        if (priority[atomStatus] > priority[currentKeyStatus]) {
-          newKeyState[part.char] = atomStatus;
-        }
+          // Priority: Correct > Present > MisplacedSyllable > Absent
+          const priority = {
+            [CharStatus.Correct]: 4,
+            [CharStatus.Present]: 3,
+            [CharStatus.MisplacedSyllable]: 2,
+            [CharStatus.Absent]: 1,
+            [CharStatus.None]: 0
+          };
 
+          if (priority[atomStatus] > priority[currentKeyStatus]) {
+            newKeyState[atom] = atomStatus;
+          }
+        });
         return {
           char: part.char,
           status: part.status

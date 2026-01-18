@@ -65,7 +65,35 @@ export const getVowelType = (char: string): 'vertical' | 'horizontal' | 'mixed' 
 };
 
 
+// Helper to breakdown complex Jamo for Keyboard Highlighting ONLY
+// This allows 'ㅘ' (Correct) to light up 'ㅗ' and 'ㅏ' keys.
+export const disassembleForKeyboard = (char: string): string[] => {
+  // Reverse Vowels
+  if (char === 'ㅘ') return ['ㅗ', 'ㅏ'];
+  if (char === 'ㅙ') return ['ㅗ', 'ㅐ'];
+  if (char === 'ㅚ') return ['ㅗ', 'ㅣ'];
+  if (char === 'ㅝ') return ['ㅜ', 'ㅓ'];
+  if (char === 'ㅞ') return ['ㅜ', 'ㅔ'];
+  if (char === 'ㅟ') return ['ㅜ', 'ㅣ'];
+  if (char === 'ㅢ') return ['ㅡ', 'ㅣ'];
 
+  // Reverse Consonants (Double Batchim) - though usually not on keyboard, 
+  // Shift+Key might cover some, but standard keyboard is simple consonants.
+  // If double batchim keys don't exist, this just returns components which are keys.
+  if (char === 'ㄳ') return ['ㄱ', 'ㅅ'];
+  if (char === 'ㄵ') return ['ㄴ', 'ㅈ'];
+  if (char === 'ㄶ') return ['ㄴ', 'ㅎ'];
+  if (char === 'ㄺ') return ['ㄹ', 'ㄱ'];
+  if (char === 'ㄻ') return ['ㄹ', 'ㅁ'];
+  if (char === 'ㄼ') return ['ㄹ', 'ㅂ'];
+  if (char === 'ㄽ') return ['ㄹ', 'ㅅ'];
+  if (char === 'ㄾ') return ['ㄹ', 'ㅌ'];
+  if (char === 'ㄿ') return ['ㄹ', 'ㅍ'];
+  if (char === 'ㅀ') return ['ㄹ', 'ㅎ'];
+  if (char === 'ㅄ') return ['ㅂ', 'ㅅ'];
+
+  return [char];
+};
 /**
  * A robust Hangul Automaton to convert a stream of Jamo into Syllables.
  * Handles complex vowels (ㅢ, ㅘ) and standard Jongseong lookahead rules.

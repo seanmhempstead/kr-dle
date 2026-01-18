@@ -14,4 +14,5 @@ export const WORD_LIST: WordEntry[] = [
   { word: '마음', meaning: 'Mind / Heart' },
   { word: '이름', meaning: 'Name' },
   { word: '나라', meaning: 'Country' },
+  { word: '사과', meaning: 'Apple' },
 ];
