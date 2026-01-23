@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { RowData, CharStatus, SyllableBlock, JamoPart } from '../types';
 import { decomposeHangul, getVowelType } from '../utils/hangul';
 import { STATUS_STYLES } from '../constants/colours';
@@ -90,46 +90,55 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
 
 const Grid: React.FC<GridProps> = ({ guesses, currentRowIndex, assembledCurrentGuess }) => {
     const emptyRows = Array.from({ length: 5 - 1 - currentRowIndex });
+    const activeRowRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (activeRowRef.current) {
+            activeRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [currentRowIndex]);
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 p-4 overflow-y-auto">
-            {/* Completed Guesses */}
-            {guesses.map((guess, i) => (
-                <div key={`row-${i}`} className="flex gap-2">
-                    <Cell syllable={guess.syllables[0]} isCurrent={false} />
-                    <Cell syllable={guess.syllables[1]} isCurrent={false} />
-                </div>
-            ))}
+        <div className="flex-1 w-full overflow-y-auto relative">
+            <div className="min-h-full flex flex-col items-center justify-center gap-2 p-4 box-border">
+                {/* Completed Guesses */}
+                {guesses.map((guess, i) => (
+                    <div key={`row-${i}`} className="flex gap-2">
+                        <Cell syllable={guess.syllables[0]} isCurrent={false} />
+                        <Cell syllable={guess.syllables[1]} isCurrent={false} />
+                    </div>
+                ))}
 
-            {/* Current Guess (Active Editing) */}
-            {currentRowIndex < 5 && (
-                <div className="flex gap-2">
-                    <Cell
-                        syllable={{
-                            char: assembledCurrentGuess[0] || '',
-                            status: CharStatus.None,
-                            parts: assembledCurrentGuess[0] ? decomposeHangul(assembledCurrentGuess[0]).map(c => ({ char: c, status: CharStatus.None })) : []
-                        }}
-                        isCurrent={true}
-                    />
-                    <Cell
-                        syllable={{
-                            char: assembledCurrentGuess[1] || '',
-                            status: CharStatus.None,
-                            parts: assembledCurrentGuess[1] ? decomposeHangul(assembledCurrentGuess[1]).map(c => ({ char: c, status: CharStatus.None })) : []
-                        }}
-                        isCurrent={true}
-                    />
-                </div>
-            )}
+                {/* Current Guess (Active Editing) */}
+                {currentRowIndex < 5 && (
+                    <div className="flex gap-2" ref={activeRowRef}>
+                        <Cell
+                            syllable={{
+                                char: assembledCurrentGuess[0] || '',
+                                status: CharStatus.None,
+                                parts: assembledCurrentGuess[0] ? decomposeHangul(assembledCurrentGuess[0]).map(c => ({ char: c, status: CharStatus.None })) : []
+                            }}
+                            isCurrent={true}
+                        />
+                        <Cell
+                            syllable={{
+                                char: assembledCurrentGuess[1] || '',
+                                status: CharStatus.None,
+                                parts: assembledCurrentGuess[1] ? decomposeHangul(assembledCurrentGuess[1]).map(c => ({ char: c, status: CharStatus.None })) : []
+                            }}
+                            isCurrent={true}
+                        />
+                    </div>
+                )}
 
-            {/* Empty Rows */}
-            {emptyRows.map((_, i) => (
-                <div key={`empty-${i}`} className="flex gap-2 opacity-30">
-                    <Cell syllable={null} isCurrent={false} />
-                    <Cell syllable={null} isCurrent={false} />
-                </div>
-            ))}
+                {/* Empty Rows */}
+                {emptyRows.map((_, i) => (
+                    <div key={`empty-${i}`} className="flex gap-2 opacity-30">
+                        <Cell syllable={null} isCurrent={false} />
+                        <Cell syllable={null} isCurrent={false} />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
