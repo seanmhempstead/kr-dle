@@ -148,21 +148,6 @@ describe('assembleJamo', () => {
     it('handles loose jamo mixed with syllables', () => {
         expect(assembleJamo(['ㅎ', 'ㅏ', 'ㄴ', 'ㄱ', 'ㅡ', 'ㄹ'])).toEqual(['한', '글']);
         expect(assembleJamo(['ㄱ', 'ㅏ', 'ㄴ', 'ㅏ', 'ㄷ', 'ㅏ'])).toEqual(['가', '나', '다']);
-        expect(assembleJamo(['ㅁ', 'ㅗ', 'ㄱ', 'ㅅ', 'ㅇ', 'ㅣ'])).toEqual(['몫', '이']); // Checking batchim carry over rules or plain block formation
-        // Note: assembleJamo standard logic often prefers greedy matching for complex batchim unless next is vowel
-        // In standard Korean typing 'dh' -> 'da' + 'h' if followed by vowel? 
-        // Actually current implementation:
-        // If JONGS.includes(c2) -> checks if next is vowel. If next IS vowel, c2 starts new block.
-        // 'ㅁ', 'ㅗ', 'ㄱ', 'ㅅ', 'ㅇ', 'ㅣ' -> '목', '싱' would be correct typing rule but let's see implementation.
-        // Wait, 'ㄱ', 'ㅅ' -> valid complex 'ㄳ'. 
-        // followed by 'ㅇ'(cho/void) which is CHOS, but assembleJamo treats input as Jamo stream.
-        // 'ㅇ' is in CHOS. But 'ㅇ' is also in JONGS? No 'ㅇ' is JONG but 'ㅇ' is also CHO.
-        // logic: if (i+2 < jamos.length) && JUNGS.includes(jamos[i+2]).
-        // here 'ㅇ' is NOT in JUNGS. 'ㅣ' is in JUNGS.
-        // So for '몫이', typing is usually ㅁ ㅗ ㄱ ㅅ ㅇ ㅣ.
-        // Implementation: c2='ㅅ'. next is 'ㅇ'. 'ㅇ' is NOT in JUNGS. 
-        // So 'ㄱ'+'ㅅ' -> 'ㄳ'.
-        // Then next block start with 'ㅇ'.
-        // So Expected: ['몫', '이'].
+        expect(assembleJamo(['ㅁ', 'ㅗ', 'ㄱ', 'ㅅ', 'ㅇ', 'ㅣ'])).toEqual(['몫', '이']);
     });
 });
