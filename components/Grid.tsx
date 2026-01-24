@@ -52,7 +52,7 @@ const Cell: React.FC<{ syllable: SyllableBlock | null, isCurrent: boolean }> = (
     };
 
     const JamoBox = ({ part, className }: { part: JamoPart, className: string }) => (
-        <div className={`flex items-center justify-center font-bold text-lg sm:text-xl ${getBgColor(part.status)} ${className}`}>
+        <div className={`flex items-center justify-center font-bold text-lg sm:text-xl leading-none ${getBgColor(part.status)} ${className}`}>
             {part.char}
         </div>
     );
