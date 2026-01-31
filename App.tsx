@@ -266,115 +266,141 @@ function App() {
   const assembledDisplay = assembleJamo(currentJamoInput);
 
   return (
-    <div className={`flex flex-col h-full w-full max-w-lg mx-auto bg-slate-900 relative ${shake ? 'shake' : ''}`}>
-      {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-slate-800">
-        <h1 className="text-xl sm:text-2xl font-bold text-blue-400 tracking-wider">KR-dle</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleNewWordClick}
-            className="p-2 text-white bg-slate-700 hover:bg-slate-600 rounded-full border border-slate-600 transition-colors"
-            title="Get a new word"
-            aria-label="New Word"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-              />
-            </svg>
-          </button>
-
-          <button
-            onClick={() => setIsHelpOpen(true)}
-            className="p-2 text-white bg-slate-700 hover:bg-slate-600 rounded-full border border-slate-600 transition-colors"
-            title="Help"
-            aria-label="Help"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
-              />
-            </svg>
-          </button>
-
-
-        </div>
-      </header>
-
-      {/* Grid Area */}
-      <Grid
-        guesses={guesses}
-        currentGuess={currentJamoInput}
-        currentRowIndex={guesses.length}
-        assembledCurrentGuess={assembledDisplay}
-      />
-
-      {/* Input Area */}
-      <div className="p-2">
-        <Keyboard
-          onChar={handleInput}
-          onDelete={handleDelete}
-          onEnter={handleEnter}
-          keyState={keyState}
-        />
+    <div className={`min-h-screen w-full modern-bg text-zinc-400 flex flex-col items-center overflow-x-hidden ${shake ? 'shake' : ''}`}>
+      {/* Corner Accents */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden container mx-auto max-w-lg">
+        <div className="absolute top-8 left-8 w-8 h-8 border-t border-l border-zinc-700/30"></div>
+        <div className="absolute top-8 right-8 w-8 h-8 border-t border-r border-zinc-700/30"></div>
+        <div className="absolute bottom-8 left-8 w-8 h-8 border-b border-l border-zinc-700/30"></div>
+        <div className="absolute bottom-8 right-8 w-8 h-8 border-b border-r border-zinc-700/30"></div>
       </div>
 
-      {/* Help Modal */}
-      <HelpModal
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
-      />
+      <div className="flex flex-col h-screen w-full max-w-lg mx-auto relative z-10">
+        {/* Header */}
+        <header className="glass-header sticky top-0 z-50 w-full">
+          <div className="flex items-center justify-between p-4 px-6">
+            <h1 className="text-xl sm:text-2xl font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
+              <div className="w-5 h-5 bg-zinc-100 rounded-sm flex items-center justify-center">
+                <div className="w-2.5 h-2.5 bg-zinc-950 rounded-xs"></div>
+              </div>
+              KR_DLE
+            </h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleNewWordClick}
+                className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 rounded-lg transition-all"
+                title="Get a new word"
+                aria-label="New Word"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+                  />
+                </svg>
+              </button>
 
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isRestartConfirmOpen}
-        onClose={() => setIsRestartConfirmOpen(false)}
-        onConfirm={startNewGame}
-        title="Start New Game?"
-        message="Are you sure you want to give up on this word? Your progress will be lost."
-        confirmText="New Word"
-      />
+              <button
+                onClick={() => setIsHelpOpen(true)}
+                className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 rounded-lg transition-all"
+                title="Help"
+                aria-label="Help"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+                  />
+                </svg>
+              </button>
 
-      {/* Game Over Modal */}
-      {gameStatus !== 'playing' && (
-        <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-slate-800 border border-slate-700 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
-            <h2 className={`text-3xl font-bold mb-4 ${gameStatus === 'won' ? 'text-green-500' : 'text-red-500'}`}>
-              {gameStatus === 'won' ? 'Correct!' : 'Game Over'}
-            </h2>
-            <div className="mb-6">
-              <p className="text-slate-400 mb-2">The word was:</p>
-              <div className="text-5xl font-bold text-white mb-2">{targetWord}</div>
-              <p className="text-blue-300 text-lg">{targetMeaning}</p>
+
             </div>
-
-            <button
-              onClick={startNewGame}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors w-full"
-            >
-              Play Again
-            </button>
           </div>
-        </div>
-      )}
+        </header>
+
+        {/* Main Content Area */}
+        <main className="flex-grow flex flex-col items-center justify-between overflow-hidden">
+
+          <div className="w-full flex justify-center items-center flex-grow overflow-hidden px-4 my-4">
+            <div className="glass-panel w-full h-full max-h-[500px] rounded-3xl p-4 relative flex flex-col">
+              <Grid
+                guesses={guesses}
+                currentGuess={currentJamoInput}
+                currentRowIndex={guesses.length}
+                assembledCurrentGuess={assembledDisplay}
+              />
+            </div>
+          </div>
+
+          {/* Input Area */}
+          <div className="w-full px-4 pb-8">
+            <div className="glass-panel p-4 rounded-2xl w-full select-none">
+              <Keyboard
+                onChar={handleInput}
+                onDelete={handleDelete}
+                onEnter={handleEnter}
+                keyState={keyState}
+              />
+            </div>
+          </div>
+        </main>
+
+        {/* Help Modal */}
+        <HelpModal
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+        />
+
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={isRestartConfirmOpen}
+          onClose={() => setIsRestartConfirmOpen(false)}
+          onConfirm={startNewGame}
+          title="Start New Game?"
+          message="Are you sure you want to give up on this word? Your progress will be lost."
+          confirmText="New Word"
+        />
+
+        {/* Game Over Modal */}
+        {gameStatus !== 'playing' && (
+          <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <div className="bg-zinc-900/90 border border-zinc-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
+              <h2 className={`text-3xl font-bold mb-4 ${gameStatus === 'won' ? 'text-emerald-500' : 'text-orange-500'}`}>
+                {gameStatus === 'won' ? 'Correct!' : 'Game Over'}
+              </h2>
+              <div className="mb-6">
+                <p className="text-zinc-500 mb-2 uppercase tracking-widest text-xs font-bold">The word was</p>
+                <div className="text-5xl font-bold text-zinc-100 mb-2 mono tracking-tight">{targetWord}</div>
+                <p className="text-zinc-400 text-lg">{targetMeaning}</p>
+              </div>
+
+              <button
+                onClick={startNewGame}
+                className="px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-lg transition-all w-full uppercase tracking-widest text-sm"
+              >
+                Play Again
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

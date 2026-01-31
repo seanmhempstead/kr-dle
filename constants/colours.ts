@@ -2,14 +2,14 @@ import { CharStatus } from '../types';
 
 export const STATUS_STYLES = {
     [CharStatus.Correct]: {
-        bg: 'bg-green-600',
+        bg: 'bg-emerald-600',
         text: 'text-white',
-        border: 'border-green-600',
-        keyBorder: 'border-green-700'
+        border: 'border-emerald-600',
+        keyBorder: 'border-emerald-700'
     },
     [CharStatus.Present]: {
         bg: 'bg-yellow-500',
-        text: 'text-white',
+        text: 'text-zinc-950',
         border: 'border-yellow-600',
         keyBorder: 'border-yellow-600'
     },
@@ -20,17 +20,17 @@ export const STATUS_STYLES = {
         keyBorder: 'border-orange-600'
     },
     [CharStatus.Absent]: {
-        bg: 'bg-slate-700',
-        text: 'text-slate-400',
-        border: 'border-slate-700',
-        keyBorder: 'border-slate-800'
+        bg: 'bg-zinc-800',
+        text: 'text-zinc-500',
+        border: 'border-zinc-800',
+        keyBorder: 'border-zinc-900'
     },
     [CharStatus.None]: {
-        bg: 'bg-slate-800', // Default cell bg
-        text: 'text-white',
-        border: 'border-slate-700', // Default cell border
-        keyBg: 'bg-slate-200', // Default key bg
-        keyText: 'text-slate-900',
-        keyHover: 'hover:bg-slate-300'
+        bg: 'bg-zinc-700/50', // Default cell bg
+        text: 'text-zinc-100',
+        border: 'border-zinc-700/30', // Default cell border
+        keyBg: 'bg-zinc-600/80', // Default key bg
+        keyText: 'text-zinc-100',
+        keyHover: 'hover:bg-zinc-500 hover:text-white'
     }
 };
