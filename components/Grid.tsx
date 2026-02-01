@@ -133,7 +133,7 @@ const Grid: React.FC<GridProps> = ({ guesses, currentRowIndex, assembledCurrentG
 
                 {/* Empty Rows */}
                 {emptyRows.map((_, i) => (
-                    <div key={`empty-${i}`} className="flex gap-2 opacity-30">
+                    <div key={`empty-${i}`} className="flex gap-2 opacity-100">
                         <Cell syllable={null} isCurrent={false} />
                         <Cell syllable={null} isCurrent={false} />
                     </div>
