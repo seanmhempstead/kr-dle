@@ -266,7 +266,7 @@ function App() {
   const assembledDisplay = assembleJamo(currentJamoInput);
 
   return (
-    <div className={`min-h-screen w-full modern-bg text-zinc-400 flex flex-col items-center overflow-x-hidden ${shake ? 'shake' : ''}`}>
+    <div className={`min-h-[100dvh] w-full modern-bg text-zinc-400 flex flex-col items-center overflow-x-hidden ${shake ? 'shake' : ''}`}>
       {/* Corner Accents */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden container mx-auto max-w-lg">
         <div className="absolute top-8 left-8 w-8 h-8 border-t border-l border-zinc-700/30"></div>
@@ -275,10 +275,10 @@ function App() {
         <div className="absolute bottom-8 right-8 w-8 h-8 border-b border-r border-zinc-700/30"></div>
       </div>
 
-      <div className="flex flex-col h-screen w-full max-w-lg mx-auto relative z-10">
+      <div className="flex flex-col h-[100dvh] w-full max-w-lg mx-auto relative z-10">
         {/* Header */}
         <header className="glass-header sticky top-0 z-50 w-full">
-          <div className="flex items-center justify-between p-4 px-6">
+          <div className="flex items-center justify-between p-2 px-6">
             <h1 className="text-xl sm:text-2xl font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
               <div className="w-5 h-5 bg-zinc-100 rounded-sm flex items-center justify-center">
                 <div className="w-2.5 h-2.5 bg-zinc-950 rounded-xs"></div>
@@ -338,8 +338,8 @@ function App() {
         {/* Main Content Area */}
         <main className="flex-grow flex flex-col items-center justify-between overflow-hidden">
 
-          <div className="w-full flex justify-center items-center flex-grow overflow-hidden px-4 my-4">
-            <div className="glass-panel w-full h-full max-h-[500px] rounded-3xl p-4 relative flex flex-col">
+          <div className="w-full flex justify-center items-center flex-grow min-h-0 overflow-hidden px-4 mt-2 mb-1">
+            <div className="glass-panel w-full h-full max-h-[700px] rounded-3xl p-4 relative flex flex-col">
               <Grid
                 guesses={guesses}
                 currentGuess={currentJamoInput}
@@ -350,8 +350,8 @@ function App() {
           </div>
 
           {/* Input Area */}
-          <div className="w-full px-4 pb-8">
-            <div className="glass-panel p-4 rounded-2xl w-full select-none">
+          <div className="w-full px-4 pb-2 flex-shrink-0">
+            <div className="glass-panel p-3 rounded-2xl w-full select-none">
               <Keyboard
                 onChar={handleInput}
                 onDelete={handleDelete}

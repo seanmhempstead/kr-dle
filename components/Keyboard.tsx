@@ -15,7 +15,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
 
   const getKeyStyle = (char: string) => {
     const status = keyState[char] || CharStatus.None;
-    const base = "font-semibold uppercase text-sm sm:text-base rounded-lg transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-12 sm:h-14 mono ";
+    const base = "font-semibold uppercase text-sm sm:text-base rounded-lg transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-10 sm:h-14 mono ";
 
     const style = STATUS_STYLES[status];
 
@@ -34,8 +34,8 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-2">
-      <div className="flex flex-col gap-2">
+    <div className="w-full max-w-3xl mx-auto p-1">
+      <div className="flex flex-col gap-1">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-center gap-1">
             {/* Add Shift Key on the last row, left side */}
@@ -72,10 +72,10 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
             )}
           </div>
         ))}
-        <div className="flex justify-center mt-2">
+        <div className="flex justify-center mt-1">
           <button
             onClick={onEnter}
-            className="w-full max-w-[240px] h-12 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-lg shadow-lg active:scale-95 transition-all uppercase tracking-widest text-xs"
+            className="w-full max-w-[240px] h-11 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-lg shadow-lg active:scale-95 transition-all uppercase tracking-widest text-xs"
           >
             ENTER
           </button>
