@@ -280,10 +280,27 @@ function App() {
         <header className="glass-header sticky top-0 z-50 w-full">
           <div className="flex items-center justify-between p-2 px-6">
             <h1 className="text-xl sm:text-2xl font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
-              <div className="w-5 h-5 bg-zinc-100 rounded-sm flex items-center justify-center">
-                <div className="w-2.5 h-2.5 bg-zinc-950 rounded-xs"></div>
-              </div>
-              KR_DLE
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+                fill="none"
+              >
+                <mask id="logo-mask">
+                  <rect x="0" y="0" width="24" height="24" rx="4" fill="white" />
+                </mask>
+                <g mask="url(#logo-mask)">
+                  {/* Top Right - Orange */}
+                  <rect x="12" y="0" width="12" height="12" className="text-orange-500" fill="currentColor" />
+                  {/* Bottom - Green */}
+                  <rect x="0" y="12" width="24" height="12" className="text-emerald-600" fill="currentColor" />
+                </g>
+                {/* Border and grid lines */}
+                <rect x="1" y="1" width="22" height="22" rx="3" stroke="currentColor" strokeWidth="2" />
+                <line x1="12" y1="1" x2="12" y2="12" stroke="currentColor" strokeWidth="2" />
+                <line x1="1" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              KR-DLE
             </h1>
             <div className="flex items-center gap-2">
               <button
