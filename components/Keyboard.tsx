@@ -42,7 +42,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
             {rowIndex === 2 && (
               <button
                 onClick={() => setIsShift(!isShift)}
-                className={`px-3 sm:px-5 rounded-lg font-bold text-sm transition-all ${isShift ? 'bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/40'}`}
+                className={`px-3 sm:px-5 rounded-lg font-bold text-sm transition-all ${isShift ? 'bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-zinc-100' : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/40'}`}
               >
                 ⇧
               </button>
