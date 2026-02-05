@@ -29,7 +29,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                     <div className="w-4 h-4 bg-zinc-100 rounded-[2px] flex items-center justify-center">
                         <div className="w-2 h-2 bg-zinc-950 rounded-[1px]"></div>
                     </div>
-                    HOW_TO_PLAY
+                    HOW TO PLAY
                 </h2>
 
                 <div className="space-y-4 text-sm sm:text-base leading-relaxed">
