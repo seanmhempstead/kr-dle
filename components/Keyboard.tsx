@@ -15,7 +15,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
 
   const getKeyStyle = (char: string) => {
     const status = keyState[char] || CharStatus.None;
-    const base = "font-bold uppercase text-sm sm:text-base rounded shadow-md transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-12 sm:h-14 ";
+    const base = "font-semibold uppercase text-sm sm:text-base rounded-lg transition-all duration-100 active:scale-95 select-none flex items-center justify-center h-10 sm:h-14 mono ";
 
     const style = STATUS_STYLES[status];
 
@@ -34,15 +34,15 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-2 bg-slate-900 pb-8">
-      <div className="flex flex-col gap-2">
+    <div className="w-full max-w-3xl mx-auto p-1">
+      <div className="flex flex-col gap-1">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-center gap-1">
             {/* Add Shift Key on the last row, left side */}
             {rowIndex === 2 && (
               <button
                 onClick={() => setIsShift(!isShift)}
-                className={`px-2 sm:px-4 rounded font-bold text-sm ${isShift ? 'bg-blue-500 text-white' : 'bg-slate-600 text-slate-200'}`}
+                className={`px-3 sm:px-5 rounded-lg font-bold text-sm transition-all ${isShift ? 'bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.3)] border border-zinc-100' : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700/40'}`}
               >
                 ⇧
               </button>
@@ -65,19 +65,19 @@ const Keyboard: React.FC<KeyboardProps> = ({ onChar, onDelete, onEnter, keyState
             {rowIndex === 2 && (
               <button
                 onClick={onDelete}
-                className="px-2 sm:px-4 bg-slate-600 text-white rounded font-bold text-sm"
+                className="px-3 sm:px-5 bg-zinc-800/60 text-zinc-400 border border-zinc-700/40 rounded-lg font-bold text-sm hover:text-zinc-100 transition-all"
               >
                 ⌫
               </button>
             )}
           </div>
         ))}
-        <div className="flex justify-center mt-2">
+        <div className="flex justify-center mt-1">
           <button
             onClick={onEnter}
-            className="w-full max-w-[200px] h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded shadow-lg active:scale-95 transition-transform"
+            className="w-full max-w-[240px] h-11 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-lg shadow-lg active:scale-95 transition-all uppercase tracking-widest text-xs"
           >
-            INPUT (입력)
+            ENTER
           </button>
         </div>
       </div>

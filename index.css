@@ -2,24 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom shake animation for invalid input */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
-}
-.shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
+  /* Custom shake animation for invalid input */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+  }
+  .shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  
+  /* Flip animation */
+  .flip-container {
+    perspective: 1000px;
+  }
+  .flip-inner {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+  .flipped .flip-inner {
+    transform: rotateX(180deg);
+  }
 
-/* Flip animation */
-.flip-container {
-  perspective: 1000px;
-}
-.flip-inner {
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-}
-.flipped .flip-inner {
-  transform: rotateX(180deg);
-}
+  /* Modern Foundation Styles */
+  :root {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  }
+
+  body {
+      background-color: #27272a; /* zinc-800 */
+      background-image: 
+          radial-gradient(circle at 50% 50%, transparent 0%, rgba(9, 9, 11, 0.4) 100%),
+          repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px),
+          repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px);
+      background-attachment: fixed;
+      color: #a1a1aa; /* zinc-400 */
+  }
+
+  .modern-bg {
+      background-color: #27272a;
+      background-image: 
+          radial-gradient(circle at 50% 50%, transparent 0%, rgba(9, 9, 11, 0.4) 100%),
+          repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px),
+          repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 10px);
+      background-attachment: fixed;
+  }
+
+  .mono {
+      font-family: 'JetBrains Mono', 'Pretendard', monospace;
+  }
+
+  .glass-header {
+      background-color: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-panel {
+      background: rgba(24, 24, 27, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Scrollbar Aesthetic */
+  ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+      background: rgba(113, 113, 122, 0.3);
+      border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+      background: rgba(161, 161, 170, 0.5);
+  }
