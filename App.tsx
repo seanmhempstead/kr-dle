@@ -397,7 +397,7 @@ function App() {
 
         {/* Game Over Modal */}
         {gameStatus !== 'playing' && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[100] backdrop-blur-md">
             <div className="bg-zinc-900/90 border border-zinc-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
               <h2 className={`text-3xl font-bold mb-4 ${gameStatus === 'won' ? 'text-emerald-500' : 'text-orange-500'}`}>
                 {gameStatus === 'won' ? 'Correct!' : 'Game Over'}
